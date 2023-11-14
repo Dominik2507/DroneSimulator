@@ -119,20 +119,21 @@ public static class Utils
         {
             int nexti = (i + 1) % n;
             int j = (i + 2) % n;
-            int nextj = (j + 1) % n;
-            while(nextj != i)
+           
+            while ((j+1)%n != i)
             {
                 if(maxIterations < iter)
                 {
                     Debug.LogError("Max iterations reached");
                     return;
                 }
+                int nextj = (j + 1) % n;
+
                 iter++;
 
-                Debug.Log(i + " " + nexti + " " + j + " " + nextj);
                 if (DoIntersect(points[i], points[nexti], points[j], points[nextj], out Vector3 intersection))
                 {
-                    Debug.Log("FOUND INTERSECTION " + intersection.ToString());
+                    Debug.Log(i + " " + nexti + " " + j + " " + nextj);
 
                     List<Vector3> poly1 = new();
                     List<Vector3> poly2 = new();
@@ -169,7 +170,7 @@ public static class Utils
                     RecursiveSplit(poly2, result);
                     return;
                 }
-                nextj = (nextj + 1) % n;
+                j = (j + 1) % n;
             }
         }
         // If no intersections found, add the whole polygon
@@ -178,7 +179,7 @@ public static class Utils
 
     static bool DoIntersect(Vector3 p1, Vector3 q1, Vector3 p2, Vector3 q2, out Vector3 intersection)
     {
-        Debug.Log("Started checking intersection.");
+        //Debug.Log("Started checking intersection.");
         float slope1 = (q1.z - p1.z) / (p1.x - q1.x);
         float slope2 = (q2.z - p2.z) / (p2.x - q2.x);
 
@@ -186,10 +187,10 @@ public static class Utils
 
         // Check if the lines are not parallel
         if (!Mathf.Approximately(slope1, slope2)
-            || IsPointOnSegment(p1, p2, q2)
-            || IsPointOnSegment(q1, p2, q2)
-            || IsPointOnSegment(p2, p1, q1)
-            || IsPointOnSegment(q2, p1, q1)
+            //|| IsPointOnSegment(p1, p2, q2)
+            //|| IsPointOnSegment(q1, p2, q2)
+            //|| IsPointOnSegment(p2, p1, q1)
+            //|| IsPointOnSegment(q2, p1, q1)
         )
         {
             intersection = FindIntersection(p1, q1, p2, q2);
@@ -203,11 +204,11 @@ public static class Utils
                 return true;
             }
 
-            Debug.Log("Intersection is not inside segments");
+            //Debug.Log("Intersection is not inside segments");
         }
        
-        Debug.Log("Doesnt intersect: " + "slope1 = " + slope1 + ", slope2 = " + slope2);
-        Debug.Log(intersection.ToString());
+        //Debug.Log("Doesnt intersect: " + "slope1 = " + slope1 + ", slope2 = " + slope2);
+        //Debug.Log(intersection.ToString());
         
 
         return false;

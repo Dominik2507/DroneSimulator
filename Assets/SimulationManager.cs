@@ -125,9 +125,9 @@ public class SimulationManager : MonoBehaviour
 
         for (int i = 0; i < 8; i++)
         {
-            float angle = 2 * Mathf.PI / 6 * i;
-            float x = radius * Mathf.Cos(angle) + Random.Range(-5, 5);
-            float y = radius * Mathf.Sin(angle) + Random.Range(-5, 5);
+            float angle = 2 * Mathf.PI / 8 * i;
+            float x = radius * Mathf.Cos(angle) + Random.Range(-3, 3);
+            float y = radius * Mathf.Sin(angle) + Random.Range(-3, 3);
             examplePoints.Add(new Vector3(x, 15, y));
         }
 

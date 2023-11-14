@@ -145,6 +145,7 @@ public class AreaSurvailance : SurvailanceManager
  
     public AreaSurvailance(List<Vector3> p) : base(p)
     {
+        if (Utils.IsClockwise(p)) { p.Reverse(); }
         algorithm = new OutwardToCenter();
         Utils.RecursiveSplit(points, polygons);
         GenerateNavigationCurve();
@@ -179,7 +180,7 @@ public class AreaSurvailance : SurvailanceManager
 
         
         List<Vector3> copyPoints = new(points);
-        copyPoints.Add(points[0]);
+        //copyPoints.Add(points[0]);
 
         copyPoints.ForEach(point => point.y -= 0.5f);
 
@@ -227,7 +228,7 @@ public class AreaSurvailance : SurvailanceManager
         mesh.vertices = vertices;
         mesh.triangles = triangles;
 
-       //SimulationManager.instance.areaDrawer.GetComponent<MeshRenderer>().material = new Material(Shader.Find("Standard"));
+        SimulationManager.instance.areaDrawer.GetComponent<MeshRenderer>().material = new Material(Shader.Find("Standard"));
     }
 }
 

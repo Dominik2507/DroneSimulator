@@ -1164,7 +1164,7 @@ Camera:
   field of view: 60
   orthographic: 0
   orthographic size: 5
-  m_Depth: -1
+  m_Depth: 2
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -3193,6 +3193,10 @@ PrefabInstance:
     - target: {fileID: 8426916755486681102, guid: edea8b9f665c1734487db2349dc8ea40, type: 3}
       propertyPath: m_Name
       value: droneModel
+      objectReference: {fileID: 0}
+    - target: {fileID: 8426916755486681102, guid: edea8b9f665c1734487db2349dc8ea40, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8426916755486913582, guid: edea8b9f665c1734487db2349dc8ea40, type: 3}
       propertyPath: m_RootOrder

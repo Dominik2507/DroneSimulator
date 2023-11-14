@@ -14,13 +14,6 @@ public class Drone : MonoBehaviour
 
     public float distanceBeforeNextPoint = 0.01f;
 
-   
-
-    void Start()
-    {
-        
-    }
-
     void Update()
     {
         if(manager is not null && manager.isRunning) Move();
