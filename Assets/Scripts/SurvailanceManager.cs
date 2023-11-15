@@ -213,7 +213,7 @@ public class AreaSurvailance : SurvailanceManager
     public virtual void drawArea()
     {
         List<Vector3> copyPoints = new(points);
-        //copyPoints.Add(points[0]);
+        copyPoints.Add(points[0]);
 
         copyPoints.ForEach(point => point.y -= 0.5f);
 

@@ -187,5 +187,14 @@ public class SimulationManager : MonoBehaviour
     {
         areas.Add(s);
     }
+
+    public void CloseApplication()
+    {
+        #if UNITY_EDITOR
+                UnityEditor.EditorApplication.isPlaying = false;
+        #else
+                    Application.Quit();
+        #endif
+    }
 }
 
