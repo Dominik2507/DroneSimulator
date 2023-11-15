@@ -161,7 +161,8 @@ public class OutwardToCenter : NavigationAlgorithm
 
                 Vector3 addedPoint = currentPoint + moveDirection * visible_width;
 
-                if (Utils.IsPointInPolygon(currentPolygon, addedPoint)) temp.Add(addedPoint);
+                if (Utils.IsPointInPolygon(currentPolygon, addedPoint))
+                    temp.Add(addedPoint);
 
             }
 

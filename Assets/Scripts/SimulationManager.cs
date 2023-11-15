@@ -9,8 +9,11 @@ public class SimulationManager : MonoBehaviour
     public List<SurvailanceManager> areas = new();
 
     public static SimulationManager instance = null;
-
+    public bool useTriangleCollapsing = false;
     public GameObject areaDrawer;
+
+
+    private bool isRunninSimulations = false;
 
     private void Start()
     {
@@ -20,6 +23,7 @@ public class SimulationManager : MonoBehaviour
     }
     public void example1()
     {
+
         List<Vector3> examplePoints = new();
 
 
@@ -30,7 +34,7 @@ public class SimulationManager : MonoBehaviour
 
         ls.addDrone(false);
         
-        areas.Add(ls);
+        AddArea(ls);
 
         StartSimulation();
     }
@@ -48,7 +52,7 @@ public class SimulationManager : MonoBehaviour
 
         ps.addDrone(false);
 
-        areas.Add(ps);
+        AddArea(ps);
 
         StartSimulation();
     }
@@ -67,7 +71,7 @@ public class SimulationManager : MonoBehaviour
 
         ps.addDrone(false);
 
-        areas.Add(ps);
+        AddArea(ps);
 
         StartSimulation();
     }
@@ -92,7 +96,7 @@ public class SimulationManager : MonoBehaviour
 
         ps.addDrone(false);
 
-        areas.Add(ps);
+        AddArea(ps);
 
         StartSimulation();
     }
@@ -113,7 +117,7 @@ public class SimulationManager : MonoBehaviour
 
         ps.addDrone(false);
 
-        areas.Add(ps);
+        AddArea(ps);
 
         StartSimulation();
     }
@@ -136,7 +140,7 @@ public class SimulationManager : MonoBehaviour
 
         ps.addDrone(false);
 
-        areas.Add(ps);
+        AddArea(ps);
 
         StartSimulation();
     }
@@ -145,6 +149,7 @@ public class SimulationManager : MonoBehaviour
     {
         foreach(SurvailanceManager sm in areas)
         {
+
             sm.startSimulation();
             sm.drawCurve();
             if(sm is AreaSurvailance sArea)
@@ -152,6 +157,8 @@ public class SimulationManager : MonoBehaviour
                 sArea.drawArea(true);
             }
         }
+
+        isRunninSimulations = true;
     }
 
     public void AddDrone()
@@ -168,6 +175,17 @@ public class SimulationManager : MonoBehaviour
         {
             sm.removeDrone();
         }
+    }
+
+    public void RemoveSurvailanceManager(SurvailanceManager s)
+    {
+        s.Destroy();
+        areas.Remove(s);
+    }
+
+    public void AddArea(SurvailanceManager s)
+    {
+        areas.Add(s);
     }
 }
 

@@ -58,26 +58,26 @@ public static class Utils
     public static Vector3? GetMiddlePointIfWithinSquare(List<Vector3> polygonPoints, float x)
     {
         // Find the minimum and maximum coordinates to determine the bounding box
-        float minX = float.MaxValue, minY = float.MaxValue;
-        float maxX = float.MinValue, maxY = float.MinValue;
+        float minX = float.MaxValue, minZ = float.MaxValue;
+        float maxX = float.MinValue, maxZ = float.MinValue;
 
         foreach (Vector3 point in polygonPoints)
         {
             minX = Mathf.Min(minX, point.x);
-            minY = Mathf.Min(minY, point.y);
+            minZ = Mathf.Min(minZ, point.y);
             maxX = Mathf.Max(maxX, point.x);
-            maxY = Mathf.Max(maxY, point.y);
+            maxZ = Mathf.Max(maxZ, point.y);
         }
 
         // Calculate the dimensions of the bounding box
         float boxWidth = maxX - minX;
-        float boxHeight = maxY - minY;
+        float boxHeight = maxZ - minZ;
 
         // Check if the bounding box fits within the x * x square
-        if (boxWidth <= x && boxHeight <= x)
+        if (boxWidth < x && boxHeight < x)
         {
             // Calculate the middle point of the bounding box
-            Vector3 middlePoint = new Vector3((minX + maxX) / 2, (minY + maxY) / 2, 0);
+            Vector3 middlePoint = new Vector3((minX + maxX) / 2, (minZ + maxZ) / 2, 0);
             return middlePoint;
         }
         else

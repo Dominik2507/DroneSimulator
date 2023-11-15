@@ -9,24 +9,37 @@ public abstract class SurvailanceManager
 
     public List<Vector3> points;
     public List<Vector3> navigationCurve = new();
+    
 
     public bool isRunning = false;
+    private LineRenderer navigationCurveRenderer;
 
     public SurvailanceManager(List<Vector3> p)
     {
         points = new(p);
     }
 
+    public void Destroy()
+    {
+        isRunning = false;
+        Object.Destroy(navigationCurveRenderer.gameObject);
+
+    }
+
     public virtual void drawCurve()
     {
-        LineRenderer lineRenderer = SimulationManager.instance.gameObject.AddComponent<LineRenderer>();
-        lineRenderer.positionCount = navigationCurve.Count;
-        lineRenderer.startWidth = 0.1f; // Set the width of the line
-        lineRenderer.endWidth = 0.1f; // Set the width of the line
-        lineRenderer.startColor = Color.blue;
-        lineRenderer.endColor = Color.blue;
+        GameObject rendererHolder = new();
+        rendererHolder.transform.parent = SimulationManager.instance.gameObject.transform;
+
+        navigationCurveRenderer = rendererHolder.AddComponent<LineRenderer>();
+        navigationCurveRenderer.positionCount = navigationCurve.Count;
+        navigationCurveRenderer.startWidth = 0.1f; // Set the width of the line
+        navigationCurveRenderer.endWidth = 0.1f; // Set the width of the line
+        navigationCurveRenderer.startColor = Color.blue;
+        navigationCurveRenderer.endColor = Color.blue;
         // Set the line points
-        lineRenderer.SetPositions(navigationCurve.ToArray());
+        navigationCurveRenderer.SetPositions(navigationCurve.ToArray());
+        
     }
 
     public virtual void addDrone(bool restart = true)
