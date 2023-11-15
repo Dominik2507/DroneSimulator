@@ -107,42 +107,55 @@ public class OutwardToCenter : NavigationAlgorithm
             iteration++;
             List<Vector3> temp = new();
 
+            if (SimulationManager.instance.useTriangleCollapsing)
+            {
+                Vector3? center = Utils.GetMiddlePointIfWithinSquare(currentPolygon, visible_width);
+                if (center is not null)
+                {
+                    navigationCurve.Add((Vector3)center);
+                    break;
+                }
+                bool removedPoints;
+                do
+                {
+                    removedPoints = false;
+                    List<Vector3> filteredPolygon = new(currentPolygon);
 
-            //bool removedPoints;
-            //do
-            //{
-            //    removedPoints = false;
-            //    List<Vector3> filteredPolygon = new(currentPolygon);
-            //    if (currentPolygon.Count < 3) break;
-            //    for (int i = 0; i < currentPolygon.Count - 1; i++)
-            //    {
+                    if (currentPolygon.Count < 3) break;
+                    for (int i = 0; i < currentPolygon.Count - 1; i++)
+                    {
 
-            //        Vector3 previousPoint = currentPolygon[(i - 1 + currentPolygon.Count) % currentPolygon.Count];
-            //        Vector3 currentPoint = currentPolygon[i];
-            //        Vector3 nextPoint = currentPolygon[(i + 1) % currentPolygon.Count];
+                        Vector3 previousPoint = currentPolygon[(i - 1 + currentPolygon.Count) % currentPolygon.Count];
+                        Vector3 currentPoint = currentPolygon[i];
+                        Vector3 nextPoint = currentPolygon[(i + 1) % currentPolygon.Count];
 
-            //        Vector3? approximatedTriangle = Utils.GetMiddlePointIfSmallArea(previousPoint, currentPoint, nextPoint, Mathf.Pow(visible_width / 2, 2) * Mathf.PI);
-            //        if (approximatedTriangle is not null && filteredPolygon.Count > 3)
-            //        {
-            //            Debug.Log("Aproximated triangle as: " + ((Vector3)approximatedTriangle).x + " " + ((Vector3)approximatedTriangle).y + " " + ((Vector3)approximatedTriangle).z);
-                        
-            //            filteredPolygon.Remove(currentPoint);
-            //            filteredPolygon.Remove(nextPoint);
-            //            filteredPolygon[(i - 1 + filteredPolygon.Count) % filteredPolygon.Count] = (Vector3)approximatedTriangle;
+                        Vector3? approximatedTriangle = Utils.GetMiddlePointIfSmallArea(previousPoint, currentPoint, nextPoint, Mathf.Pow(visible_width, 2) / 2);
+                        if (approximatedTriangle is not null && filteredPolygon.Count >= 3)
+                        {
+                            Debug.Log("Aproximated triangle as: " + ((Vector3)approximatedTriangle).x + " " + ((Vector3)approximatedTriangle).y + " " + ((Vector3)approximatedTriangle).z);
 
-            //            removedPoints = true;
-            //            break;
-            //        }
-            //        else if (approximatedTriangle is not null && filteredPolygon.Count == 3)
-            //        {
-            //            filteredPolygon.Clear();
-            //            filteredPolygon.Add((Vector3)approximatedTriangle);
-            //        }
+                            //filteredPolygon.Remove(currentPoint);
+                            //filteredPolygon.Remove(nextPoint);
+                            //filteredPolygon[(i - 1 + filteredPolygon.Count) % filteredPolygon.Count] = (Vector3)approximatedTriangle;
+                            
+                            //filteredPolygon.Remove(previousPoint);
+                            //filteredPolygon.Remove(nextPoint);
+                            filteredPolygon.Remove(currentPoint);
 
-            //    }
-            //    currentPolygon = new(filteredPolygon);
+                            removedPoints = true;
+                            break;
+                        }
+                        //else if (approximatedTriangle is not null && filteredPolygon.Count == 3)
+                        //{
+                        //    filteredPolygon.Clear();
+                        //    filteredPolygon.Add((Vector3)approximatedTriangle);
+                        //}
 
-            //} while (removedPoints);
+                    }
+                    currentPolygon = new(filteredPolygon);
+
+                } while (removedPoints);
+            }
 
             if (currentPolygon.Count < 3)
             {

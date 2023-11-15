@@ -6,6 +6,7 @@ public class SimulationManager : MonoBehaviour
 {
     public GameObject dronePrefab;
 
+
     public List<SurvailanceManager> areas = new();
 
     public static SimulationManager instance = null;
@@ -13,7 +14,7 @@ public class SimulationManager : MonoBehaviour
     public GameObject areaDrawer;
 
 
-    private bool isRunninSimulations = false;
+    private bool isRunningSimulations = false;
 
     private void Start()
     {
@@ -30,7 +31,7 @@ public class SimulationManager : MonoBehaviour
         examplePoints.Add(new Vector3(0, 15, 10));
         examplePoints.Add(new Vector3(20, 15, 10));
 
-        LineSurvailance ls = new(examplePoints);
+        LineSurvailance ls = new(examplePoints, "Segmented line");
 
         ls.addDrone(false);
         
@@ -48,7 +49,7 @@ public class SimulationManager : MonoBehaviour
         examplePoints.Add(new Vector3(20, 20, 10));
         examplePoints.Add(new Vector3(10, 20, 0));
 
-        PolygonLineSurvailance ps = new(examplePoints);
+        PolygonLineSurvailance ps = new(examplePoints, "Cycle from lines");
 
         ps.addDrone(false);
 
@@ -67,7 +68,7 @@ public class SimulationManager : MonoBehaviour
         examplePoints.Add(new Vector3(-10, 15, -10));
         examplePoints.Add(new Vector3( 10, 15,  10));
 
-        AreaSurvailance ps = new(examplePoints, algorithm);
+        AreaSurvailance ps = new(examplePoints, algorithm, "Area - Hourglass");
 
         ps.addDrone(false);
 
@@ -92,7 +93,7 @@ public class SimulationManager : MonoBehaviour
         }
 
         OutwardToCenter algorithm = new();
-        AreaSurvailance ps = new(examplePoints, algorithm);
+        AreaSurvailance ps = new(examplePoints, algorithm, "Area - Hexagon");
 
         ps.addDrone(false);
 
@@ -113,7 +114,7 @@ public class SimulationManager : MonoBehaviour
         }
 
         OutwardToCenter algorithm = new();
-        AreaSurvailance ps = new(examplePoints, algorithm);
+        AreaSurvailance ps = new(examplePoints, algorithm, "Area - random 7 dots");
 
         ps.addDrone(false);
 
@@ -136,7 +137,7 @@ public class SimulationManager : MonoBehaviour
         }
 
         OutwardToCenter algorithm = new();
-        AreaSurvailance ps = new(examplePoints, algorithm);
+        AreaSurvailance ps = new(examplePoints, algorithm, "Area - Octagon with noise");
 
         ps.addDrone(false);
 
@@ -149,16 +150,15 @@ public class SimulationManager : MonoBehaviour
     {
         foreach(SurvailanceManager sm in areas)
         {
-
-            sm.startSimulation();
-            sm.drawCurve();
+            if(sm.navigationCurveRenderer is null) sm.drawCurve();
             if(sm is AreaSurvailance sArea)
             {
-                sArea.drawArea(true);
+                if (sArea.areaLineDrawer is null) sArea.drawArea();
             }
+            sm.startSimulation();
         }
 
-        isRunninSimulations = true;
+        isRunningSimulations = true;
     }
 
     public void AddDrone()

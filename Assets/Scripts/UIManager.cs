@@ -8,6 +8,7 @@ public class UIManager : MonoBehaviour
     public static UIManager instance = null;
 
     public GameObject curveButtonPanel;
+    public GameObject curveRemoveButtonPrefab;
     void Start()
     {
         if (instance == null) instance = this;

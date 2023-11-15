@@ -1,9 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public abstract class SurvailanceManager
 {
+    public string curveName;
     public int numberOfDrones = 0;
     public List<Drone> drones = new();
 
@@ -12,24 +15,35 @@ public abstract class SurvailanceManager
     
 
     public bool isRunning = false;
-    private LineRenderer navigationCurveRenderer;
+    public LineRenderer navigationCurveRenderer = null;
+    private GameObject curveRemoveButton;
 
-    public SurvailanceManager(List<Vector3> p)
+    public SurvailanceManager(List<Vector3> p, string name)
     {
         points = new(p);
+        curveName = name;
     }
 
-    public void Destroy()
+    public virtual void Destroy()
     {
         isRunning = false;
         Object.Destroy(navigationCurveRenderer.gameObject);
+        Object.Destroy(curveRemoveButton);
 
+        foreach(Drone drone in drones)
+        {
+            Object.Destroy(drone.gameObject);
+        }
     }
 
     public virtual void drawCurve()
     {
         GameObject rendererHolder = new();
         rendererHolder.transform.parent = SimulationManager.instance.gameObject.transform;
+        curveRemoveButton = Object.Instantiate(UIManager.instance.curveRemoveButtonPrefab);
+        curveRemoveButton.transform.SetParent(UIManager.instance.curveButtonPanel.transform);
+        curveRemoveButton.GetComponent<Button>().onClick.AddListener(() => { SimulationManager.instance.RemoveSurvailanceManager(this); });
+        curveRemoveButton.GetComponentInChildren<TextMeshProUGUI>().SetText(curveName);
 
         navigationCurveRenderer = rendererHolder.AddComponent<LineRenderer>();
         navigationCurveRenderer.positionCount = navigationCurve.Count;
@@ -119,7 +133,7 @@ public abstract class SurvailanceManager
 public class LineSurvailance : SurvailanceManager
 {
 
-    public LineSurvailance(List<Vector3> p) : base(p) {
+    public LineSurvailance(List<Vector3> p, string name) : base(p, name) {
         GenerateNavigationCurve();
     }
     
@@ -135,7 +149,7 @@ public class LineSurvailance : SurvailanceManager
 public class PolygonLineSurvailance : SurvailanceManager
 {
 
-    public PolygonLineSurvailance(List<Vector3> p) : base(p)
+    public PolygonLineSurvailance(List<Vector3> p, string name) : base(p, name)
     {
         GenerateNavigationCurve();
     }
@@ -155,8 +169,10 @@ public class AreaSurvailance : SurvailanceManager
     public NavigationAlgorithm algorithm = null;
 
     public List<List<Vector3>> polygons = new();
+
+    public GameObject areaLineDrawer = null;
  
-    public AreaSurvailance(List<Vector3> p) : base(p)
+    public AreaSurvailance(List<Vector3> p, string name) : base(p, name)
     {
         if (Utils.IsClockwise(p)) { p.Reverse(); }
         algorithm = new OutwardToCenter();
@@ -164,11 +180,17 @@ public class AreaSurvailance : SurvailanceManager
         GenerateNavigationCurve();
     }
 
-    public AreaSurvailance(List<Vector3> p, NavigationAlgorithm alg) : base(p)
+    public AreaSurvailance(List<Vector3> p, NavigationAlgorithm alg, string name) : base(p, name)
     {
         algorithm = alg;
         Utils.RecursiveSplit(points, polygons);
         GenerateNavigationCurve();
+    }
+
+    public override void Destroy()
+    {
+        Object.Destroy(areaLineDrawer);
+        base.Destroy();
     }
 
     public override void GenerateNavigationCurve()
@@ -188,19 +210,17 @@ public class AreaSurvailance : SurvailanceManager
 
     }
 
-    public virtual void drawArea(bool OnlyCircumfence = false)
+    public virtual void drawArea()
     {
-
-        
         List<Vector3> copyPoints = new(points);
         //copyPoints.Add(points[0]);
 
         copyPoints.ForEach(point => point.y -= 0.5f);
 
-        GameObject emptyObject = new("EmptyChildObject " + SimulationManager.instance.gameObject.transform.childCount);
-        emptyObject.transform.parent = SimulationManager.instance.gameObject.transform;
+        areaLineDrawer = new("EmptyChildObject " + SimulationManager.instance.gameObject.transform.childCount);
+        areaLineDrawer.transform.parent = SimulationManager.instance.gameObject.transform;
 
-        LineRenderer lineRenderer = emptyObject.AddComponent<LineRenderer>();
+        LineRenderer lineRenderer = areaLineDrawer.AddComponent<LineRenderer>();
         lineRenderer.positionCount = copyPoints.Count;
         lineRenderer.startWidth = 0.5f; // Set the width of the line
         lineRenderer.endWidth = 0.5f; // Set the width of the line
@@ -210,38 +230,6 @@ public class AreaSurvailance : SurvailanceManager
         lineRenderer.endColor = Color.Lerp(Color.blue, Color.red, Random.Range(0, 1));
         lineRenderer.material.color = Color.Lerp(Color.blue, Color.red, Random.Range(0, 1));
         lineRenderer.SetPositions(copyPoints.ToArray());
-
-        
-        if (OnlyCircumfence) return;
-
-        Mesh mesh = new Mesh();
-        SimulationManager.instance.areaDrawer.GetComponent<MeshFilter>().mesh = mesh;
-
-        
-
-        Vector3[] vertices = copyPoints.ToArray();
-        int[] triangles = new int[(vertices.Length - 2) * 3];
-
-        // Ensure vertices are relative to the GameObject's position
-        for (int i = 0; i < vertices.Length; i++)
-        {
-            vertices[i] -= SimulationManager.instance.areaDrawer.transform.position;
-        }
-
-        int vertexIndex = 0;
-
-        for (int i = 1; i < vertices.Length - 1; i++)
-        {
-            triangles[vertexIndex] = 0;
-            triangles[vertexIndex + 1] = i;
-            triangles[vertexIndex + 2] = i + 1;
-            vertexIndex += 3;
-        }
-
-        mesh.vertices = vertices;
-        mesh.triangles = triangles;
-
-        SimulationManager.instance.areaDrawer.GetComponent<MeshRenderer>().material = new Material(Shader.Find("Standard"));
     }
 }
 
@@ -250,7 +238,7 @@ public class AreaSurvailance : SurvailanceManager
 public class RectangleAreaSurvailance : AreaSurvailance
 {
    
-    public RectangleAreaSurvailance(List<Vector3> p) : base(p)
+    public RectangleAreaSurvailance(List<Vector3> p, string name) : base(p, name)
     {
         if(p.Count != 4)
         {
@@ -260,7 +248,7 @@ public class RectangleAreaSurvailance : AreaSurvailance
         GenerateNavigationCurve();
     }
 
-    public RectangleAreaSurvailance(List<Vector3> p, NavigationAlgorithm alg) : base(p, alg)
+    public RectangleAreaSurvailance(List<Vector3> p, NavigationAlgorithm alg, string name) : base(p, alg, name)
     {
         if (p.Count != 4)
         {
