@@ -494,7 +494,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 203208213}
         m_TargetAssemblyTypeName: SimulationManager, Assembly-CSharp
-        m_MethodName: example1
+        m_MethodName: CloseApplication
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
