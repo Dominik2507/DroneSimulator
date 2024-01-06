@@ -2,10 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum SceneMode
+{
+    freeDraw, presetDraw, runningSimulation, none
+}
+
 public class SimulationManager : MonoBehaviour
 {
     public GameObject dronePrefab;
-
+ 
+    public SceneMode mode = SceneMode.freeDraw;
 
     public List<SurvailanceManager> areas = new();
 
@@ -13,9 +19,16 @@ public class SimulationManager : MonoBehaviour
     public bool useTriangleCollapsing = false;
     public GameObject areaDrawer;
 
+    public SurvailanceManager currentGrid;
 
     private bool isRunningSimulations = false;
+    public bool isViewingGrid = false;
+    private SceneMode modeBeforeSimulation = SceneMode.freeDraw;
 
+
+    public float simSpeed = 1;
+    public int FOV = 60;
+    public float verticalOffset = 4;
     private void Start()
     {
 
@@ -28,16 +41,14 @@ public class SimulationManager : MonoBehaviour
         List<Vector3> examplePoints = new();
 
 
-        examplePoints.Add(new Vector3(0, 15, 10));
-        examplePoints.Add(new Vector3(20, 15, 10));
+        examplePoints.Add(new Vector3(-10, 1, 0));
+        examplePoints.Add(new Vector3(10, 1, 0));
 
         LineSurvailance ls = new(examplePoints, "Segmented line");
 
         ls.addDrone(false);
         
         AddArea(ls);
-
-        StartSimulation();
     }
 
     public void example2()
@@ -45,17 +56,15 @@ public class SimulationManager : MonoBehaviour
         List<Vector3> examplePoints = new();
 
 
-        examplePoints.Add(new Vector3(0, 20, 10));
-        examplePoints.Add(new Vector3(20, 20, 10));
-        examplePoints.Add(new Vector3(10, 20, 0));
+        examplePoints.Add(new Vector3(0, 1, 10));
+        examplePoints.Add(new Vector3(20, 1, 10));
+        examplePoints.Add(new Vector3(10, 1, 0));
 
         PolygonLineSurvailance ps = new(examplePoints, "Cycle from lines");
 
         ps.addDrone(false);
 
         AddArea(ps);
-
-        StartSimulation();
     }
 
     public void example3()
@@ -63,18 +72,16 @@ public class SimulationManager : MonoBehaviour
         List<Vector3> examplePoints = new();
         OutwardToCenter algorithm = new();
 
-        examplePoints.Add(new Vector3(-10, 15,  10));
-        examplePoints.Add(new Vector3( 10, 15, -10));
-        examplePoints.Add(new Vector3(-10, 15, -10));
-        examplePoints.Add(new Vector3( 10, 15,  10));
+        examplePoints.Add(new Vector3(-10, 1,  10));
+        examplePoints.Add(new Vector3( 10, 1, -10));
+        examplePoints.Add(new Vector3(-10, 1, -10));
+        examplePoints.Add(new Vector3( 10, 1,  10));
 
         AreaSurvailance ps = new(examplePoints, algorithm, "Area - Hourglass");
 
         ps.addDrone(false);
 
         AddArea(ps);
-
-        StartSimulation();
     }
 
     public void Example4()
@@ -89,7 +96,7 @@ public class SimulationManager : MonoBehaviour
             float angle = 2 * Mathf.PI / 6 * i;
             float x = radius * Mathf.Cos(angle);
             float y = radius * Mathf.Sin(angle);
-            examplePoints.Add(new Vector3(x, 15, y));
+            examplePoints.Add(new Vector3(x, 1, y));
         }
 
         OutwardToCenter algorithm = new();
@@ -99,7 +106,6 @@ public class SimulationManager : MonoBehaviour
 
         AddArea(ps);
 
-        StartSimulation();
     }
     public void Example5()
     {
@@ -110,7 +116,7 @@ public class SimulationManager : MonoBehaviour
         {
             float x = Random.Range(-25f, 25f);
             float y = Random.Range(-25f, 25f);
-            examplePoints.Add(new Vector3(x, 15, y));
+            examplePoints.Add(new Vector3(x, 1, y));
         }
 
         OutwardToCenter algorithm = new();
@@ -119,8 +125,6 @@ public class SimulationManager : MonoBehaviour
         ps.addDrone(false);
 
         AddArea(ps);
-
-        StartSimulation();
     }
 
     public void Example6()
@@ -133,7 +137,7 @@ public class SimulationManager : MonoBehaviour
             float angle = 2 * Mathf.PI / 8 * i;
             float x = radius * Mathf.Cos(angle) + Random.Range(-3, 3);
             float y = radius * Mathf.Sin(angle) + Random.Range(-3, 3);
-            examplePoints.Add(new Vector3(x, 15, y));
+            examplePoints.Add(new Vector3(x, 1, y));
         }
 
         OutwardToCenter algorithm = new();
@@ -142,12 +146,15 @@ public class SimulationManager : MonoBehaviour
         ps.addDrone(false);
 
         AddArea(ps);
-
-        StartSimulation();
     }
 
     public void StartSimulation()
     {
+        modeBeforeSimulation = mode;
+        mode = SceneMode.runningSimulation;
+
+        currentGrid = areas[0];
+
         foreach(SurvailanceManager sm in areas)
         {
             if(sm.navigationCurveRenderer is null) sm.drawCurve();
@@ -159,6 +166,17 @@ public class SimulationManager : MonoBehaviour
         }
 
         isRunningSimulations = true;
+    }
+
+    public void EndSimulation()
+    {
+        foreach (SurvailanceManager sm in areas)
+        {
+            sm.endSimulation();
+        }
+
+        mode = modeBeforeSimulation;
+        //Debug.Log(mode);
     }
 
     public void AddDrone()
@@ -181,11 +199,18 @@ public class SimulationManager : MonoBehaviour
     {
         s.Destroy();
         areas.Remove(s);
+        if(areas.Count < 1)
+        {
+            EndSimulation();
+            UIManager.instance.disableStartSimulation();
+        }
     }
 
     public void AddArea(SurvailanceManager s)
     {
         areas.Add(s);
+        s.drawCurve();
+        UIManager.instance.enableStartSimulation();
     }
 
     public void CloseApplication()
@@ -195,6 +220,36 @@ public class SimulationManager : MonoBehaviour
         #else
                     Application.Quit();
         #endif
+    }
+
+    public void SetSimSpeed(float value)
+    {
+        simSpeed = value;
+    }
+
+    public void SetDroneFOV(int value)
+    {
+        FOV = value;
+        onDroneSettingsChange();
+    }
+
+    public void SetDroneOffset(float value)
+    {
+        verticalOffset = value;
+        onDroneSettingsChange();
+    }
+
+    public void onDroneSettingsChange() {
+
+        EndSimulation();
+
+        foreach(SurvailanceManager area in areas)
+        {
+            area.GenerateNavigationCurve();
+            area.drawCurve();
+        }
+
+        StartSimulation();
     }
 }
 

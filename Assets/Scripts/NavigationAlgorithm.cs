@@ -42,9 +42,11 @@ public class OutwardToCenter : NavigationAlgorithm
 
     public void generateRectangleCurve(RectangleAreaSurvailance manager, List<Vector3> polygon = null)
     {
-        Drone d = SimulationManager.instance.dronePrefab.GetComponent<Drone>();
-        float visible_width = 2 * d.vertical_offset * Mathf.Tan(Mathf.PI * d.GetComponentInChildren<Camera>().fieldOfView / 180);
-        Debug.Log(visible_width);
+   
+        float verticalOffset = SimulationManager.instance.verticalOffset;
+        float FOV = SimulationManager.instance.FOV;
+        float visible_width = 1.5f * verticalOffset * Mathf.Tan(Mathf.PI * FOV / 180);
+        ////Debug.Log(visible_width);
 
 
         List<Vector3> navigationCurve = manager.navigationCurve;
@@ -73,9 +75,10 @@ public class OutwardToCenter : NavigationAlgorithm
     }
     public void generateFreeFormCurve(AreaSurvailance manager, List<Vector3> polygon = null)
     {
-        Drone d = SimulationManager.instance.dronePrefab.GetComponent<Drone>();
-        float visible_width = 2 * d.vertical_offset * Mathf.Tan(Mathf.PI * d.GetComponentInChildren<Camera>().fieldOfView / 180);
-        // Debug.Log(visible_width);
+        float verticalOffset = SimulationManager.instance.verticalOffset;
+        float FOV = SimulationManager.instance.FOV;
+        float visible_width = 1.5f * verticalOffset * Mathf.Tan(Mathf.PI * FOV / 180);
+        // //Debug.Log(visible_width);
 
         List<Vector3> points;
         if(polygon == null)
@@ -132,7 +135,7 @@ public class OutwardToCenter : NavigationAlgorithm
                         Vector3? approximatedTriangle = Utils.GetMiddlePointIfSmallArea(previousPoint, currentPoint, nextPoint, Mathf.Pow(visible_width, 2) / 2);
                         if (approximatedTriangle is not null && filteredPolygon.Count >= 3)
                         {
-                            Debug.Log("Aproximated triangle as: " + ((Vector3)approximatedTriangle).x + " " + ((Vector3)approximatedTriangle).y + " " + ((Vector3)approximatedTriangle).z);
+                            ////Debug.Log("Aproximated triangle as: " + ((Vector3)approximatedTriangle).x + " " + ((Vector3)approximatedTriangle).y + " " + ((Vector3)approximatedTriangle).z);
 
                             //filteredPolygon.Remove(currentPoint);
                             //filteredPolygon.Remove(nextPoint);

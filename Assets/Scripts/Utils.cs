@@ -64,9 +64,9 @@ public static class Utils
         foreach (Vector3 point in polygonPoints)
         {
             minX = Mathf.Min(minX, point.x);
-            minZ = Mathf.Min(minZ, point.y);
+            minZ = Mathf.Min(minZ, point.z);
             maxX = Mathf.Max(maxX, point.x);
-            maxZ = Mathf.Max(maxZ, point.y);
+            maxZ = Mathf.Max(maxZ, point.z);
         }
 
         // Calculate the dimensions of the bounding box
@@ -77,7 +77,7 @@ public static class Utils
         if (boxWidth < x && boxHeight < x)
         {
             // Calculate the middle point of the bounding box
-            Vector3 middlePoint = new Vector3((minX + maxX) / 2, (minZ + maxZ) / 2, 0);
+            Vector3 middlePoint = new Vector3((minX + maxX) / 2, 0, (minZ + maxZ) / 2);
             return middlePoint;
         }
         else
@@ -112,7 +112,7 @@ public static class Utils
             return;
         }
 
-        int maxIterations = 50;
+        int maxIterations = 100;
         int iter = 0;
         int n = points.Count;
         for (int i = 0; i < n; i++)
@@ -124,7 +124,7 @@ public static class Utils
             {
                 if(maxIterations < iter)
                 {
-                    Debug.LogError("Max iterations reached");
+                    ////Debug.LogError("Max iterations reached");
                     return;
                 }
                 int nextj = (j + 1) % n;
@@ -133,7 +133,7 @@ public static class Utils
 
                 if (DoIntersect(points[i], points[nexti], points[j], points[nextj], out Vector3 intersection))
                 {
-                    Debug.Log(i + " " + nexti + " " + j + " " + nextj);
+                    ////Debug.Log(i + " " + nexti + " " + j + " " + nextj);
 
                     List<Vector3> poly1 = new();
                     List<Vector3> poly2 = new();
@@ -151,14 +151,14 @@ public static class Utils
                         poly2.Add(points[k]);
                     }
 
-                    if (!IsClockwise(poly1))
+                    if (IsClockwise(poly1))
                     {
                         poly1.Remove(intersection);
                         poly1.Add(intersection);
                         poly1.Reverse();
                     }
 
-                    if (!IsClockwise(poly2))
+                    if (IsClockwise(poly2))
                     {
                         poly2.Remove(intersection);
                         poly2.Add(intersection);
@@ -179,7 +179,7 @@ public static class Utils
 
     static bool DoIntersect(Vector3 p1, Vector3 q1, Vector3 p2, Vector3 q2, out Vector3 intersection)
     {
-        //Debug.Log("Started checking intersection.");
+        ////Debug.Log("Started checking intersection.");
         float slope1 = (q1.z - p1.z) / (p1.x - q1.x);
         float slope2 = (q2.z - p2.z) / (p2.x - q2.x);
 
@@ -199,16 +199,16 @@ public static class Utils
 
             if (IsIntersecting)
             {
-                Debug.Log("FOUND INTERSECTION");
-                Debug.Log(intersection.ToString());
+                //Debug.Log("FOUND INTERSECTION");
+                //Debug.Log(intersection.ToString());
                 return true;
             }
 
-            //Debug.Log("Intersection is not inside segments");
+            ////Debug.Log("Intersection is not inside segments");
         }
        
-        //Debug.Log("Doesnt intersect: " + "slope1 = " + slope1 + ", slope2 = " + slope2);
-        //Debug.Log(intersection.ToString());
+        ////Debug.Log("Doesnt intersect: " + "slope1 = " + slope1 + ", slope2 = " + slope2);
+        ////Debug.Log(intersection.ToString());
         
 
         return false;
@@ -250,7 +250,7 @@ public static class Utils
             area += (polygon[next].x - polygon[i].x) * (polygon[next].z + polygon[i].z);
         }
 
-        return area < 0;
+        return area > 0;
     }
 
 }
